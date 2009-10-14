@@ -40,12 +40,19 @@ public class CachingProxyFactory {
 
     public <T> T wrap(T repo, final int timeToLive) {
         ProxyFactory factory = new ProxyFactory(repo);
+        factory.addInterface(CacheManagement.class);
         factory.addAdvice(new org.aopalliance.intercept.MethodInterceptor() {
             CacheStore cache = cacheStoreFactory.getNewInstance();
 
             public Object invoke(MethodInvocation invocation) throws Throwable {
                 final Object[] arguments = invocation.getArguments();
                 final Method method = invocation.getMethod();
+                if (CacheManagement.CLEARCACHE_METHOD.equals(method.getName())) {
+                    log.debug("clearing cache implicitly via " + method.getName());
+                    cache.clear();
+                    // its a virtual method and with void return type, so its ok
+                    return null;
+                }                                
                 if (flushesCache(method)) {
                     log.debug("clear cache for method "+method.getName());
                     cache.clear();

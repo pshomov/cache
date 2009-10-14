@@ -24,18 +24,32 @@ package is.siminn.asgard.cache;
 
 import is.siminn.asgard.cache.support.CachableRepo;
 import static org.mockito.Mockito.*;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class CachingProxyFactoryTest {
+    private final CacheStoreFactory storeFactory = mock(CacheStoreFactory.class);
+    private CacheStore store;
+    private CachableRepo repo;
 
-    @Test
-    public void should_clear_cache_store_before_calling_method_with_annotation_flushCache(){
-        final CacheStoreFactory storeFactory = mock(CacheStoreFactory.class);
-        final CacheStore store = mock(CacheStore.class);
+    @BeforeMethod
+    public void run_before_tests() {
+        store = mock(CacheStore.class);
         when(storeFactory.getNewInstance()).thenReturn(store);
         CachingProxyFactory proxyFactory = new CachingProxyFactory(storeFactory);
-        final CachableRepo repo = proxyFactory.wrap(mock(CachableRepo.class), 100);
+        repo = proxyFactory.wrap(mock(CachableRepo.class), 100);
+    }
+
+    @Test
+    public void should_clear_cache_store_before_calling_method_with_annotation_flushCache() {
         repo.method_invalidates_cache();
         verify(store).clear();
     }
+
+    @Test
+    public void should_clear_cache_store_when_calling_explicit_clearCache_method() {
+        ((CacheManagement) repo).clearCache();
+        verify(store).clear();
+    }
 }
+
