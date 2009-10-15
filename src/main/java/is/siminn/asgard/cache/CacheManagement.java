@@ -24,7 +24,6 @@ Inital version of this file contributed by Síminn hf. (http://www.siminn.is)
 package is.siminn.asgard.cache;
 
 public interface CacheManagement {
-    @InvalidatesCache
     public void clearCache();
     public static final String CLEARCACHE_METHOD = "clearCache";
 }
